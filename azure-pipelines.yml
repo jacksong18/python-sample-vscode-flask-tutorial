@@ -6,18 +6,34 @@
 trigger:
 - master
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '3.6'
-  displayName: 'Use Python 3.6'
+jobs:
+- job: test
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.6'
+    displayName: 'Use Python 3.6'
 
-- script: |
-    python -m pip install --upgrade pip
-    pip install -r requirements.txt
-  displayName: 'Install dependencies'
+  - script: |
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+    displayName: 'Install dependencies'
 
-- script: |
-    pip install pytest pytest-azurepipelines pytest-cov
-    pytest
-  displayName: 'pytest'
+  - script: |
+      pip install pytest pytest-azurepipelines pytest-cov
+      pytest
+    displayName: 'pytest'
+
+# track deployments on the environment
+- deployment: DeployWeb
+  displayName: deploy Web App
+  pool:
+    vmImage: 'Ubuntu-16.04'
+  # creates an environment if it doesn't exist
+  environment: 'smarthotel-dev'
+  strategy:
+    # default deployment strategy, more coming...
+    runOnce:
+      deploy:
+        steps:
+        - script: echo my first deployment
